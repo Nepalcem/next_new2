@@ -1,5 +1,5 @@
-import LoginButton from "@/components/LoginButton";
-import RegisterButton from "@/components/RegisterButton";
+import LoginButton from "@/components/navigation/LoginButton";
+import RegisterButton from "@/components/navigation/RegisterButton";
 
 export default function Home() {
   return (
