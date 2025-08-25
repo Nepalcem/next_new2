@@ -8,7 +8,7 @@ export default function AuthPage() {
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col justify-center items-center">
-      <h1 className="block my-8 text-4xl">TM - GA CRM</h1>
+      <h1 className="block my-8 text-4xl font-bold">TM - GA CRM</h1>
       <section className="flex items-center justify-center">
         <div className="w-[400px] bg-white p-8 rounded-lg shadow-lg">
           <div className="flex mb-6 relative">
