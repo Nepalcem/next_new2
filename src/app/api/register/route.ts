@@ -7,6 +7,15 @@ export async function POST(req: Request) {
   try {
     const { email, name, password } = await req.json();
 
+    console.log(email);
+
+    if (!email.includes("monster")) {
+      return NextResponse.json(
+        { error: "Email must be valid" },
+        { status: 400 }
+      );
+    }
+
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
@@ -23,9 +32,9 @@ export async function POST(req: Request) {
     `;
 
     return NextResponse.json({ user: result[0] });
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Handle duplicate email error
-    if (err.message.includes("duplicate key")) {
+    if (err instanceof Error && err.message.includes("duplicate key")) {
       return NextResponse.json(
         { error: "Email already exists" },
         { status: 400 }
