@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 export default function RegisterForm() {
   const [name, setName] = useState("");
@@ -15,25 +16,42 @@ export default function RegisterForm() {
     setLoading(true);
     setMessage("");
 
-   try {
-     const res = await fetch("/api/register", {
-       method: "POST",
-       headers: { "Content-Type": "application/json" },
-       body: JSON.stringify({ name, email, password }),
-     });
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-     const data = await res.json();
+      const data = await res.json();
 
-     if (!res.ok) {
-       setMessage(data.error || "Registration failed");
-     } else {
-        router.push("/dashboard");
-     }
-   } catch (err) {
-     setMessage(`Something went wrong. Error:${err}`);
-   } finally {
-     setLoading(false);
-   }
+      if (!res.ok) {
+        setMessage(data.error || "Registration failed");
+      } else {
+        // Auto-login after successful registration
+        const signInResult = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (signInResult?.error) {
+          setMessage(
+            "Registration successful but auto-login failed. Please log in manually."
+          );
+        } else {
+          setMessage("Registration successful! Redirecting to dashboard...");
+
+          // Redirect to dashboard on successful auto-login
+          router.push("/dashboard");
+          router.refresh(); // Refresh to update session state
+        }
+      }
+    } catch (err) {
+      setMessage(`Something went wrong. Error:${err}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const generateEmail = () => {

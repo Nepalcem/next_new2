@@ -1,15 +1,42 @@
+"use client";
+
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-    setLoading(false);
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setMessage("Invalid email or password");
+      } else {
+        // Redirect to dashboard on successful login
+        router.push("/dashboard");
+        router.refresh(); // Refresh to update session state
+      }
+    } catch (err) {
+      setMessage("Something went wrong. Please try again.");
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -20,6 +47,7 @@ export default function LoginForm() {
           Email
         </label>
         <input
+          name="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -33,6 +61,7 @@ export default function LoginForm() {
           Password
         </label>
         <input
+          name="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
