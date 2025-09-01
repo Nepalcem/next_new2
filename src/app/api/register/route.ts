@@ -7,11 +7,9 @@ export async function POST(req: Request) {
   try {
     const { email, name, password } = await req.json();
 
-    console.log(email);
-
     if (!email.includes("monster")) {
       return NextResponse.json(
-        { error: "Email must be valid" },
+        { error: "Email must be valid. Try again" },
         { status: 400 }
       );
     }

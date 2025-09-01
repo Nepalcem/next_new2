@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function RegisterForm() {
   const [name, setName] = useState("");
@@ -7,14 +8,32 @@ export default function RegisterForm() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    // submit logic here...
+   try {
+     const res = await fetch("/api/register", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ name, email, password }),
+     });
 
-    setLoading(false);
+     const data = await res.json();
+
+     if (!res.ok) {
+       setMessage(data.error || "Registration failed");
+     } else {
+        router.push("/dashboard");
+     }
+   } catch (err) {
+     setMessage(`Something went wrong. Error:${err}`);
+   } finally {
+     setLoading(false);
+   }
   };
 
   const generateEmail = () => {
