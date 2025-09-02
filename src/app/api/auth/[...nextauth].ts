@@ -46,7 +46,6 @@ export const authOptions: AuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
-
       if (user) {
         token.id =
           typeof user.id === "string" ? parseInt(user.id, 10) : user.id;

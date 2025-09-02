@@ -23,10 +23,9 @@ CREATE TABLE IF NOT EXISTS "SoldServices" (
 CREATE TABLE IF NOT EXISTS "CTR" (
   id SERIAL PRIMARY KEY,
   user_id INT REFERENCES "Users"(id) ON DELETE CASCADE,
-  date DATE NOT NULL,
   source TEXT,
   time_spent INTERVAL DEFAULT '30 minutes',
   description TEXT,
-  comments TEXT,
+  PTM INTEGER,
   created_at TIMESTAMP DEFAULT NOW()
 );
