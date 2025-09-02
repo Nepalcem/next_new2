@@ -46,6 +46,9 @@ export default function DashboardPage() {
           <p>
             <strong>Role:</strong> {session.user?.role || "user"}
           </p>
+          <p>
+            <strong>UserId:</strong> {session.user?.id || "user"}
+          </p>
         </div>
       </div>
     </div>

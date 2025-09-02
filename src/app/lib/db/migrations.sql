@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "CTR" (
   id SERIAL PRIMARY KEY,
   user_id INT REFERENCES "Users"(id) ON DELETE CASCADE,
   source TEXT,
-  time_spent INTERVAL DEFAULT '30 minutes',
+  time_spent INTEGER DEFAULT 30,
   description TEXT,
   PTM INTEGER,
   created_at TIMESTAMP DEFAULT NOW()
