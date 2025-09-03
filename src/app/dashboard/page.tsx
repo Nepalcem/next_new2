@@ -12,7 +12,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (status === "loading") return; // Still loading
     if (!session) {
-      router.push("/auth");
+      router.push("/authorization");
     }
   }, [session, status, router]);
 

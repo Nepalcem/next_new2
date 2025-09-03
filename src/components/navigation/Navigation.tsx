@@ -28,7 +28,7 @@ export default function Navigation() {
             ""
           )}
           <button
-            onClick={() => signOut({ callbackUrl: "/auth" })}
+            onClick={() => signOut({ callbackUrl: "/authorization" })}
             className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition cursor-pointer"
           >
             Logout
