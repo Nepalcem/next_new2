@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import Navigation from "@/components/navigation/Navigation";
 import CTRForm from "@/components/forms/CTR-form/CTRForm";
+import { Trash2 } from "lucide-react";
 import { CTRRecord } from "@/types/app-types";
 
 export default function CTRPage() {
@@ -36,6 +37,32 @@ export default function CTRPage() {
     }
   }, []);
 
+  const deleteCTRRecord = async (recordId: number) => {
+    if (!confirm("Are you sure you want to delete this CTR record?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/ctr?id=${recordId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        // Remove the deleted record from the state
+        setCtrRecords(ctrRecords.filter((record) => record.id !== recordId));
+      } else {
+        const error = await response.json();
+        alert(`Error deleting record: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error deleting CTR record:", error);
+      alert("Failed to delete CTR record");
+    }
+  };
+
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
@@ -47,7 +74,7 @@ export default function CTRPage() {
     if (session.user?.role === "user" && !hasFetchedRecords.current) {
       fetchCTRRecords();
     }
-  }, [session, status, fetchCTRRecords, router]);
+  }, [session, status, router]);
 
   if (status === "loading") {
     return (
@@ -90,9 +117,18 @@ export default function CTRPage() {
                       <h3 className="font-medium text-gray-900">
                         {record.source}
                       </h3>
-                      <span className="text-sm text-gray-500">
-                        {new Date(record.created_at).toLocaleDateString()}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">
+                          {new Date(record.created_at).toLocaleDateString()}
+                        </span>
+                        <button
+                          onClick={() => deleteCTRRecord(record.id)}
+                          className="text-red-600 hover:text-red-800 p-2 rounded hover:bg-red-50 cursor-pointer"
+                          title="Delete record"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
                     <p className="text-gray-700 mb-2">{record.description}</p>
                     <div className="flex gap-4 text-sm text-gray-600">

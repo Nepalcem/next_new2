@@ -95,3 +95,63 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const ctrId = searchParams.get("id");
+
+    if (!ctrId) {
+      return NextResponse.json(
+        { error: "CTR ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate that ctrId is a valid number
+    const id = parseInt(ctrId);
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: "Invalid CTR ID format" },
+        { status: 400 }
+      );
+    }
+
+    // Check if the CTR record exists and user has access (owner or admin)
+    const existingRecord = await sql`
+      SELECT id FROM "CTR" 
+      WHERE id = ${id} 
+        AND (user_id = ${session.user.id} OR ${session.user.role} = 'admin')
+    `;
+
+    if (existingRecord.length === 0) {
+      return NextResponse.json(
+        { error: "CTR record not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    // Delete the CTR record
+    await sql`
+      DELETE FROM "CTR" 
+      WHERE id = ${id}
+    `;
+
+    return NextResponse.json(
+      { message: "CTR record deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting CTR record:", error);
+    return NextResponse.json(
+      { error: "Failed to delete CTR record" },
+      { status: 500 }
+    );
+  }
+}
