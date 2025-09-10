@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Navigation from "@/components/navigation/Navigation";
+import PasswordChangeForm from "@/components/forms/passwordChange/PasswordChangeForm";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -38,17 +39,20 @@ export default function DashboardPage() {
       <div className="p-8">
         <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
 
-        <div className="mt-4 p-4 bg-white rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-2">User Info</h2>
-          <p>
-            <strong>Email:</strong> {session.user?.email}
-          </p>
-          <p>
-            <strong>Role:</strong> {session.user?.role || "user"}
-          </p>
-          <p>
-            <strong>UserId:</strong> {session.user?.id || "user"}
-          </p>
+        <div className="mt-4 p-4 bg-white rounded-lg shadow flex flex-row gap-4 min-h-[300px]">
+          <div >
+            <h2 className="text-xl font-semibold mb-2">User Info</h2>
+            <p>
+              <strong>Email:</strong> {session.user?.email}
+            </p>
+            <p>
+              <strong>Role:</strong> {session.user?.role || "user"}
+            </p>
+            <p>
+              <strong>UserId:</strong> {session.user?.id || "user"}
+            </p>
+          </div>
+          <PasswordChangeForm />
         </div>
       </div>
     </div>

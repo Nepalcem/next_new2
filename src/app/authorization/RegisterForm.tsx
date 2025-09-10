@@ -17,7 +17,7 @@ export default function RegisterForm() {
     setMessage("");
 
     try {
-      const res = await fetch("/api/register", {
+      const res = await fetch("/api/user/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
