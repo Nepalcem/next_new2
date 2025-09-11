@@ -39,7 +39,7 @@ export default function DashboardPage() {
       <div className="p-8">
         <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
 
-        <div className="mt-4 p-4 bg-white rounded-lg shadow flex flex-row gap-4 min-h-[300px]">
+        <div className="mt-4 p-4 bg-white rounded-lg shadow flex flex-row gap-4">
           <div >
             <h2 className="text-xl font-semibold mb-2">User Info</h2>
             <p>
