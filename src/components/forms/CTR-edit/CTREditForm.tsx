@@ -1,31 +1,59 @@
 "use client";
 
 import { useState } from "react";
+import { CTRRecord } from "@/types/app-types";
+import { Edit } from "lucide-react";
 
-export default function PasswordChangeForm() {
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+interface CTREditFormProps {
+  record: CTRRecord;
+  onSuccess: () => void;
+}
+
+export default function CTREditForm({ record, onSuccess }: CTREditFormProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    source: record.source,
+    description: record.description,
+    ptm: record.ptm,
+    time_spent: record.time_spent,
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
 
   const handleClose = () => {
     setIsOpen(false);
     setMessage("");
-    setNewPassword("");
-    setConfirmPassword("");
+    setFormData({
+      source: record.source,
+      description: record.description,
+      ptm: record.ptm,
+      time_spent: record.time_spent,
+    });
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        name === "ptm" || name === "time_spent" ? parseInt(value) || 0 : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (newPassword !== confirmPassword) {
-      setMessage("Passwords do not match");
+    // Validate PTM
+    if (formData.ptm < 1 || formData.ptm > 20) {
+      setMessage("PTM must be between 1 and 20");
       return;
     }
 
-    if (newPassword.length < 6) {
-      setMessage("Password must be at least 6 characters long");
+    // Validate required fields
+    if (!formData.source.trim() || !formData.description.trim()) {
+      setMessage("Source and description are required");
       return;
     }
 
@@ -33,26 +61,27 @@ export default function PasswordChangeForm() {
     setMessage("");
 
     try {
-      const response = await fetch("/api/user/patch", {
+      const response = await fetch(`/api/ctr/patch?id=${record.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ newPassword }),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Password updated successfully");
-        setNewPassword("");
-        setConfirmPassword("");
-        setIsOpen(false);
+        setMessage("CTR record updated successfully");
+        onSuccess();
+        setTimeout(() => {
+          handleClose();
+        }, 1500);
       } else {
-        setMessage(data.error || "Failed to update password");
+        setMessage(data.error || "Failed to update CTR record");
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error updating CTR record:", error);
       setMessage("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
@@ -65,9 +94,10 @@ export default function PasswordChangeForm() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="w-40 h-12 text-sm font-medium text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50 cursor-pointer"
+        title="Edit record"
       >
-        Change Password
+        <Edit size={18} />
       </button>
 
       {/* Modal Overlay */}
@@ -78,11 +108,11 @@ export default function PasswordChangeForm() {
 
           {/* Modal */}
           <div className="flex min-h-full items-center justify-center p-4">
-            <div className="relative bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-md">
+            <div className="relative bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-lg">
               {/* Modal Header */}
               <div className="flex justify-between items-center p-6 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Change Password
+                  Edit CTR Record
                 </h2>
                 <button
                   type="button"
@@ -111,38 +141,79 @@ export default function PasswordChangeForm() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label
-                      htmlFor="newPassword"
+                      htmlFor="source"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      New Password
+                      Source
                     </label>
                     <input
-                      type="password"
-                      id="newPassword"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
+                      type="text"
+                      id="source"
+                      name="source"
+                      value={formData.source}
+                      onChange={handleInputChange}
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       required
-                      minLength={6}
                     />
                   </div>
 
                   <div>
                     <label
-                      htmlFor="confirmPassword"
+                      htmlFor="description"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Confirm New Password
+                      Description
                     </label>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      rows={3}
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       required
-                      minLength={6}
                     />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        htmlFor="ptm"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        PTM (1-20)
+                      </label>
+                      <input
+                        type="number"
+                        id="ptm"
+                        name="ptm"
+                        value={formData.ptm}
+                        onChange={handleInputChange}
+                        min="1"
+                        max="20"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="time_spent"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Time Spent (minutes)
+                      </label>
+                      <input
+                        type="number"
+                        id="time_spent"
+                        name="time_spent"
+                        value={formData.time_spent}
+                        onChange={handleInputChange}
+                        min="1"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        required
+                      />
+                    </div>
                   </div>
 
                   {message && (
@@ -171,7 +242,7 @@ export default function PasswordChangeForm() {
                       disabled={isLoading}
                       className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 cursor-pointer"
                     >
-                      {isLoading ? "Updating..." : "Update Password"}
+                      {isLoading ? "Updating..." : "Update Record"}
                     </button>
                   </div>
                 </form>

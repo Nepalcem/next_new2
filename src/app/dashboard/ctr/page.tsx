@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import Navigation from "@/components/navigation/Navigation";
 import CTRForm from "@/components/forms/CTR-form/CTRForm";
+import CTREditForm from "@/components/forms/CTR-edit/CTREditForm";
 import { Trash2 } from "lucide-react";
 import { CTRRecord } from "@/types/app-types";
 
@@ -74,7 +75,7 @@ export default function CTRPage() {
     if (session.user?.role === "user" && !hasFetchedRecords.current) {
       fetchCTRRecords();
     }
-  }, [session, status, router]);
+  }, [session, status, router, fetchCTRRecords]);
 
   if (status === "loading") {
     return (
@@ -121,6 +122,10 @@ export default function CTRPage() {
                         <span className="text-sm text-gray-500">
                           {new Date(record.created_at).toLocaleDateString()}
                         </span>
+                        <CTREditForm
+                          record={record}
+                          onSuccess={fetchCTRRecords}
+                        />
                         <button
                           onClick={() => deleteCTRRecord(record.id)}
                           className="text-red-600 hover:text-red-800 p-2 rounded hover:bg-red-50 cursor-pointer"
