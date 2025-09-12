@@ -103,7 +103,7 @@ export default function CTRPage() {
 
         <div className="mt-8 bg-white rounded-lg shadow">
           <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold">CTR Records</h2>
+            <h2 className="text-xl font-semibold">CTR Records for {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h2>
           </div>
           <div className="p-6">
             {isLoadingRecords ? (

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]";
 import sql from "@/app/lib/db/db";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -11,12 +11,36 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get current month and year
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1; // getMonth() returns 0-11, so add 1
+    // Get query parameters
+    const { searchParams } = new URL(request.url);
+    const monthParam = searchParams.get("month");
+    const yearParam = searchParams.get("year");
 
-    // Fetch CTR records for the current month
+    let year, month;
+
+    if (monthParam && yearParam) {
+      // Use provided month and year
+      year = parseInt(yearParam);
+      month = parseInt(monthParam);
+
+      // Validate parameters
+      if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
+        return NextResponse.json(
+          {
+            error:
+              "Invalid month or year parameters. Month must be 1-12, year must be a valid number.",
+          },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Default to current month and year (backward compatibility)
+      const now = new Date();
+      year = now.getFullYear();
+      month = now.getMonth() + 1; // getMonth() returns 0-11, so add 1
+    }
+
+    // Fetch CTR records for the specified month and year
     const ctrRecords = await sql`
       SELECT 
         id,
@@ -28,8 +52,8 @@ export async function GET() {
         created_at
       FROM "CTR"
       WHERE user_id = ${session.user.id}
-        AND EXTRACT(YEAR FROM created_at) = ${currentYear}
-        AND EXTRACT(MONTH FROM created_at) = ${currentMonth}
+        AND EXTRACT(YEAR FROM created_at) = ${year}
+        AND EXTRACT(MONTH FROM created_at) = ${month}
       ORDER BY created_at DESC
     `;
 
